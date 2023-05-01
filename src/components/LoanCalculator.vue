@@ -133,6 +133,44 @@
                       />
                     </div>
                   </v-col>
+                  <v-col cols="12" md="12" lg="12">
+                    <v-simple-table>
+                      <template v-slot:default>
+                        <thead>
+                          <tr>
+                            <th class="text-left">Year</th>
+                            <th class="text-left">Total Payment</th>
+                            <th class="text-left">Balance</th>
+                            <th class="text-left">Loan Paid to Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            v-for="(item, index) in tenureInMonths"
+                            :key="`row${index}`"
+                          >
+                            <td>
+                              {{
+                                index == 0
+                                  ? months[now.getMonth()]
+                                  : index >= 12
+                                  ? months[now.getMonth() + index - 12]
+                                  : months[now.getMonth() + index]
+                              }}
+                              <p>{{ months[now.getMonth() + index - 12] }}</p>
+                            </td>
+                            <td>{{ Math.round(emi) }}</td>
+                            <td>
+                              {{ Math.round(totalAmountPayable - emi * index) }}
+                            </td>
+                            <td>
+                              {{ (emi * index * 100) / totalAmountPayable }}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </template>
+                    </v-simple-table>
+                  </v-col>
                 </v-row>
               </v-card-text>
             </v-card>
@@ -164,6 +202,21 @@ export default {
           enabled: true,
         },
       },
+      now: new Date(),
+      months: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sept",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
     };
   },
   components: {
@@ -197,6 +250,9 @@ export default {
         labels: ["Principal Loan Amount", "Total Interest"],
       };
       return data;
+    },
+    tenureInMonths() {
+      return this.tenure * 12;
     },
   },
 };
