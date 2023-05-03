@@ -117,12 +117,12 @@
                       >
                     </div>
                   </v-col>
-                  <v-col cols="12" md="12" lg="12">
+                  <v-col cols="12" md="12" lg="12" v-if="show">
                     <h2>Emi: {{ Math.round(emi) }}</h2>
                     <h2>Total amount payable: {{ totalAmountPayable }}</h2>
                     <h2>Total interest payable: {{ totalInterestPayable }}</h2>
                   </v-col>
-                  <v-col cols="12" md="12" lg="12">
+                  <v-col cols="12" md="12" lg="12" v-if="show">
                     <div class="mb-5">
                       <DoughnutChart
                         id="amountPayableChart"
@@ -133,7 +133,7 @@
                       />
                     </div>
                   </v-col>
-                  <v-col cols="12" md="12" lg="12">
+                  <!-- <v-col cols="12" md="12" lg="12" v-if="show">
                     <v-simple-table>
                       <template v-slot:default>
                         <thead>
@@ -153,11 +153,10 @@
                               {{
                                 index == 0
                                   ? months[now.getMonth()]
-                                  : index >= 12
-                                  ? months[now.getMonth() + index - 12]
+                                  : now.getMonth() + index >= 12
+                                  ? months[(now.getMonth() + index) % 12]
                                   : months[now.getMonth() + index]
                               }}
-                              <p>{{ months[now.getMonth() + index - 12] }}</p>
                             </td>
                             <td>{{ Math.round(emi) }}</td>
                             <td>
@@ -170,6 +169,33 @@
                         </tbody>
                       </template>
                     </v-simple-table>
+                  </v-col> -->
+                  <v-col cols="12" md="12" lg="12" v-if="show">
+                    <v-data-table
+                      group-by="groupBy"
+                      :headers="headers"
+                      :items="repaymentScheduleData"
+                    >
+                      <template
+                        v-slot:group.header="{ group, items, isOpen, toggle }"
+                      >
+                        <template v-if="group != ''">
+                          <td>
+                            <v-icon small class="mr-2" @click="toggle"
+                              >{{ isOpen ? "mdi-minus" : "mdi-plus" }} </v-icon
+                            >{{ group }}
+                          </td>
+                          <td>{{ calculateAnnualPrincipal(group) }}</td>
+                          <td>{{ calculateAnnualPayment(group) }}</td>
+                          <td>{{ calculateTotalAnnualBalance(group) }}</td>
+                          <td>{{ calculateTotalAnnualPercentage(group) }}</td>
+                        </template>
+                        <th v-else class="d-none"></th>
+                      </template>
+                      <template v-slot:[`item.principalAmount`]="{ item }">
+                        {{ Math.round(item.principalAmount) }}
+                      </template>
+                    </v-data-table>
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -217,6 +243,33 @@ export default {
         "Nov",
         "Dec",
       ],
+      headers: [
+        {
+          text: "Year",
+          align: "start",
+          value: "year",
+        },
+        {
+          text: "principalAmount",
+          align: "start",
+          value: "principalAmount",
+        },
+        {
+          text: "Total Payment",
+          align: "start",
+          value: "totalPayment",
+        },
+        {
+          text: "Balance",
+          align: "start",
+          value: "balance",
+        },
+        {
+          text: "Loan Paid to Date",
+          align: "start",
+          value: "loanPaidToDate",
+        },
+      ],
     };
   },
   components: {
@@ -253,6 +306,89 @@ export default {
     },
     tenureInMonths() {
       return this.tenure * 12;
+    },
+    show() {
+      if (this.interestRate && this.tenure && this.loanAmount > 0) return true;
+      else return false;
+    },
+    repaymentScheduleData() {
+      let data = [];
+
+      //Calculate Data
+      for (let i = 0; i < this.tenureInMonths; i++) {
+        let year =
+          i == 0
+            ? this.months[this.now.getMonth()]
+            : this.now.getMonth() + i >= 12
+            ? this.months[(this.now.getMonth() + i) % 12]
+            : this.months[this.now.getMonth() + i];
+
+        let yearlyOffset = Math.trunc(Math.abs(this.now.getMonth() + i) / 12);
+
+        let groupBy = new Date().getFullYear() + yearlyOffset;
+
+        let totalEmiPaid = this.emi * (i + 1);
+
+        let previousPrincipalAmount = 0;
+        data.forEach((item) => {
+          previousPrincipalAmount += item.principalAmount;
+        });
+
+        let interestAmount =
+          i == 0
+            ? this.loanAmount * (this.interestRate / 1200)
+            : (this.loanAmount - previousPrincipalAmount) *
+              (this.interestRate / 1200);
+
+        let principalAmount = this.emi - interestAmount;
+
+        let rowObj = {
+          groupBy: groupBy,
+          year: year,
+          totalPayment: Math.round(this.emi),
+          balance: Math.round(
+            Math.round(this.totalAmountPayable) - totalEmiPaid
+          ),
+          loanPaidToDate: (this.emi * (i + 1) * 100) / this.totalAmountPayable,
+          principalAmount: principalAmount,
+          principalBalance: Math.round(this.loanAmount - principalAmount),
+        };
+        data.push(rowObj);
+      }
+      return data;
+    },
+  },
+  methods: {
+    calculateAnnualPayment(groupBy) {
+      let totalAnnualPayment =
+        this.repaymentScheduleData.filter((item) => item.groupBy == groupBy)
+          .length * this.emi;
+      return Math.round(totalAnnualPayment);
+    },
+    calculateTotalAnnualBalance(groupBy) {
+      // let totalAnnualPrincipalBalance = 0;
+      let totalPrincipal = 0;
+      this.repaymentScheduleData.forEach((item) => {
+        // console.log("item: ", item);
+        if (item.groupBy <= groupBy) {
+          // console.log("item.totalPrincipal: ", item.principalAmount);
+          totalPrincipal += item.principalAmount;
+          // console.log("totalPrincipal for " + groupBy + " : ", totalPrincipal);
+        }
+      });
+      return Math.round(this.loanAmount - totalPrincipal);
+    },
+    calculateAnnualPrincipal(groupBy) {
+      let totalAnnualPayment = 0;
+      this.repaymentScheduleData.forEach((item) => {
+        if (item.groupBy == groupBy) totalAnnualPayment += item.principalAmount;
+      });
+      return Math.round(totalAnnualPayment);
+    },
+    calculateTotalAnnualPercentage(groupBy) {
+      let balancePrincipal =
+        this.loanAmount - this.calculateTotalAnnualBalance(groupBy);
+      return ((balancePrincipal * 100) / this.loanAmount).toFixed(2);
     },
   },
 };
