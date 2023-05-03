@@ -54,27 +54,18 @@
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" md="8" lg="12">
-                    <v-slider
-                      v-model="interestRate"
-                      step="0.5"
-                      :max="20"
-                      :min="5"
-                    >
+                    <v-slider v-model="interestRate" :max="20" :min="0">
                     </v-slider>
 
                     <div class="steps" id="loanintereststeps">
                       <span class="tick" style="left: 0%"
+                        >|<br /><span class="marker">0</span></span
+                      ><span class="tick" style="left: 25%"
                         >|<br /><span class="marker">5</span></span
-                      ><span class="tick" style="left: 16.67%"
-                        >|<br /><span class="marker">7.5</span></span
-                      ><span class="tick" style="left: 33.34%"
-                        >|<br /><span class="marker">10</span></span
                       ><span class="tick" style="left: 50%"
-                        >|<br /><span class="marker">12.5</span></span
-                      ><span class="tick" style="left: 66.67%"
+                        >|<br /><span class="marker">10</span></span
+                      ><span class="tick" style="left: 75%"
                         >|<br /><span class="marker">15</span></span
-                      ><span class="tick" style="left: 83.34%"
-                        >|<br /><span class="marker">17.5</span></span
                       ><span class="tick" style="left: 100%"
                         >|<br /><span class="marker">20</span></span
                       >
@@ -89,17 +80,25 @@
                       dense
                       append-icon="mdi-currency-inr"
                     ></v-text-field>
+                    <v-btn-toggle v-model="tenureType">
+                      <v-btn> Yr </v-btn>
+                      <v-btn> Mo </v-btn>
+                    </v-btn-toggle>
                   </v-col>
                   <v-col cols="12" md="8" lg="12">
                     <v-slider
                       v-model="tenure"
                       step="0.5"
-                      :max="30"
+                      :max="tenureType == 0 ? 30 : 360"
                       :min="0"
                       hide-details
                     >
                     </v-slider>
-                    <div class="steps" id="loantermsteps">
+                    <div
+                      class="steps"
+                      id="loantermsteps"
+                      v-if="tenureType == 0"
+                    >
                       <span class="tick" style="left: 0%"
                         >|<br /><span class="marker">0</span></span
                       ><span class="tick" style="left: 16.67%"
@@ -116,11 +115,34 @@
                         >|<br /><span class="marker">30</span></span
                       >
                     </div>
+                    <div class="steps" id="loantermsteps" v-else>
+                      <span class="tick" style="left: 0%"
+                        >|<br /><span class="marker">0</span></span
+                      ><span class="tick" style="left: 16.67%"
+                        >|<br /><span class="marker">60</span></span
+                      ><span class="tick" style="left: 33.33%"
+                        >|<br /><span class="marker">120</span></span
+                      ><span class="tick" style="left: 50%"
+                        >|<br /><span class="marker">180</span></span
+                      ><span class="tick" style="left: 66.67%"
+                        >|<br /><span class="marker">240</span></span
+                      ><span class="tick" style="left: 83.33%"
+                        >|<br /><span class="marker">300</span></span
+                      ><span class="tick" style="left: 100%"
+                        >|<br /><span class="marker">360</span></span
+                      >
+                    </div>
                   </v-col>
                   <v-col cols="12" md="12" lg="12" v-if="show">
-                    <h2>Emi: {{ Math.round(emi) }}</h2>
-                    <h2>Total amount payable: {{ totalAmountPayable }}</h2>
-                    <h2>Total interest payable: {{ totalInterestPayable }}</h2>
+                    <h2>Emi: {{ formatCurrency(Math.round(emi)) }}</h2>
+                    <h2>
+                      Total amount payable:
+                      {{ formatCurrency(totalAmountPayable) }}
+                    </h2>
+                    <h2>
+                      Total interest payable:
+                      {{ formatCurrency(totalInterestPayable) }}
+                    </h2>
                   </v-col>
                   <v-col cols="12" md="12" lg="12" v-if="show">
                     <div class="mb-5">
@@ -133,43 +155,6 @@
                       />
                     </div>
                   </v-col>
-                  <!-- <v-col cols="12" md="12" lg="12" v-if="show">
-                    <v-simple-table>
-                      <template v-slot:default>
-                        <thead>
-                          <tr>
-                            <th class="text-left">Year</th>
-                            <th class="text-left">Total Payment</th>
-                            <th class="text-left">Balance</th>
-                            <th class="text-left">Loan Paid to Date</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr
-                            v-for="(item, index) in tenureInMonths"
-                            :key="`row${index}`"
-                          >
-                            <td>
-                              {{
-                                index == 0
-                                  ? months[now.getMonth()]
-                                  : now.getMonth() + index >= 12
-                                  ? months[(now.getMonth() + index) % 12]
-                                  : months[now.getMonth() + index]
-                              }}
-                            </td>
-                            <td>{{ Math.round(emi) }}</td>
-                            <td>
-                              {{ Math.round(totalAmountPayable - emi * index) }}
-                            </td>
-                            <td>
-                              {{ (emi * index * 100) / totalAmountPayable }}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </template>
-                    </v-simple-table>
-                  </v-col> -->
                   <v-col cols="12" md="12" lg="12" v-if="show">
                     <v-data-table
                       group-by="groupBy"
@@ -180,21 +165,38 @@
                         v-slot:group.header="{ group, items, isOpen, toggle }"
                       >
                         <template v-if="group != ''">
-                          <td>
+                          <td class="d-flex justify-start align-center">
                             <v-icon small class="mr-2" @click="toggle"
                               >{{ isOpen ? "mdi-minus" : "mdi-plus" }} </v-icon
-                            >{{ group }}
+                            ><span class="ml-2">{{ group }}</span>
                           </td>
-                          <td>{{ calculateAnnualPrincipal(group) }}</td>
-                          <td>{{ calculateAnnualPayment(group) }}</td>
-                          <td>{{ calculateTotalAnnualBalance(group) }}</td>
-                          <td>{{ calculateTotalAnnualPercentage(group) }}</td>
+                          <!-- <td>{{ calculateAnnualPrincipal(group) }}</td> -->
+                          <td class="text-left">
+                            {{ calculateAnnualPayment(group) }}
+                          </td>
+                          <td class="text-left">
+                            {{
+                              formatCurrency(calculateTotalAnnualBalance(group))
+                            }}
+                          </td>
+                          <td class="text-left">
+                            {{ calculateTotalAnnualPercentage(group) }}%
+                          </td>
                         </template>
                         <th v-else class="d-none"></th>
                       </template>
-                      <template v-slot:[`item.principalAmount`]="{ item }">
+                      <!-- <template v-slot:[`item.principalAmount`]="{ item }">
                         {{ Math.round(item.principalAmount) }}
-                      </template>
+                      </template> -->
+                      <template v-slot:[`item.loanPaidToDate`]="{ item }"
+                        >{{ item.loanPaidToDate.toFixed(2) }}%</template
+                      >
+                      <template v-slot:[`item.principalBalance`]="{ item }">{{
+                        formatCurrency(item.principalBalance.toFixed(2))
+                      }}</template>
+                      <template v-slot:[`item.totalPayment`]="{ item }">{{
+                        formatCurrency(item.totalPayment.toFixed(2))
+                      }}</template>
                     </v-data-table>
                   </v-col>
                 </v-row>
@@ -209,12 +211,13 @@
 
 <script>
 import DoughnutChart from "@/components/DoughnutChart";
+import currency from "currency.js";
 
 export default {
   data() {
     return {
       loanAmount: 0,
-      interestRate: 5,
+      interestRate: 0,
       tenure: 0,
       doughtnutOptions: {
         legend: {
@@ -249,11 +252,11 @@ export default {
           align: "start",
           value: "year",
         },
-        {
-          text: "principalAmount",
-          align: "start",
-          value: "principalAmount",
-        },
+        // {
+        //   text: "principalAmount",
+        //   align: "start",
+        //   value: "principalAmount",
+        // },
         {
           text: "Total Payment",
           align: "start",
@@ -262,7 +265,7 @@ export default {
         {
           text: "Balance",
           align: "start",
-          value: "balance",
+          value: "principalBalance",
         },
         {
           text: "Loan Paid to Date",
@@ -270,6 +273,7 @@ export default {
           value: "loanPaidToDate",
         },
       ],
+      tenureType: 0,
     };
   },
   components: {
@@ -279,14 +283,14 @@ export default {
     emi() {
       // E = (p.r.(1 + r)^n) / ((1 + r)^n -1)
       let r = this.interestRate / 1200;
-      let n = this.tenure * 12;
+      let n = this.tenureInMonths;
       let emi =
         (this.loanAmount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
       console.log("this.emi: ", emi);
       return emi;
     },
     totalAmountPayable() {
-      return Math.round(this.emi * this.tenure * 12);
+      return Math.round(this.emi * this.tenureInMonths);
     },
     totalInterestPayable() {
       return this.totalAmountPayable - this.loanAmount;
@@ -305,7 +309,8 @@ export default {
       return data;
     },
     tenureInMonths() {
-      return this.tenure * 12;
+      if (this.tenureType == 0) return this.tenure * 12;
+      else return this.tenure;
     },
     show() {
       if (this.interestRate && this.tenure && this.loanAmount > 0) return true;
@@ -341,6 +346,18 @@ export default {
               (this.interestRate / 1200);
 
         let principalAmount = this.emi - interestAmount;
+        let principalBalance = 0;
+        if (i == 0) {
+          principalBalance = Math.round(this.loanAmount - principalAmount);
+        } else {
+          principalBalance = Math.round(
+            this.loanAmount -
+              (data
+                .map((item) => item.principalAmount)
+                .reduce((a, b) => a + b, 0) +
+                principalAmount)
+          );
+        }
 
         let rowObj = {
           groupBy: groupBy,
@@ -351,8 +368,10 @@ export default {
           ),
           loanPaidToDate: (this.emi * (i + 1) * 100) / this.totalAmountPayable,
           principalAmount: principalAmount,
-          principalBalance: Math.round(this.loanAmount - principalAmount),
+          principalBalance: principalBalance,
         };
+
+        console.log("principalBalance ", rowObj.principalBalance);
         data.push(rowObj);
       }
       return data;
@@ -363,7 +382,9 @@ export default {
       let totalAnnualPayment =
         this.repaymentScheduleData.filter((item) => item.groupBy == groupBy)
           .length * this.emi;
-      return Math.round(totalAnnualPayment);
+      return currency(Math.round(totalAnnualPayment), {
+        symbol: "₹",
+      }).format();
     },
     calculateTotalAnnualBalance(groupBy) {
       // let totalAnnualPrincipalBalance = 0;
@@ -383,12 +404,21 @@ export default {
       this.repaymentScheduleData.forEach((item) => {
         if (item.groupBy == groupBy) totalAnnualPayment += item.principalAmount;
       });
-      return Math.round(totalAnnualPayment);
+      return currency(totalAnnualPayment, {
+        symbol: "₹",
+        precision: 2,
+      }).format();
     },
     calculateTotalAnnualPercentage(groupBy) {
       let balancePrincipal =
         this.loanAmount - this.calculateTotalAnnualBalance(groupBy);
       return ((balancePrincipal * 100) / this.loanAmount).toFixed(2);
+    },
+    formatCurrency(amount) {
+      console.log("amount: ", amount);
+      return currency(amount, {
+        symbol: "₹",
+      }).format();
     },
   },
 };

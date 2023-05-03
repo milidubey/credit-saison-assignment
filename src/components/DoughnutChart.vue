@@ -48,6 +48,9 @@ export default {
     chartConstructor(chartType, chartData, chartOptions) {
       const chartElement = document.getElementById(this.id);
 
+      //Destroy the old instance of doughnut chart to prevent old data from being rendered.
+      if (this.chart) this.destroyChart();
+
       this.chart = new Chart(chartElement, {
         type: chartType,
         data: chartData,

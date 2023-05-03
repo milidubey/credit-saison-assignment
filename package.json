@@ -10,6 +10,7 @@
   "dependencies": {
     "chart.js": "^2.9.4",
     "core-js": "^3.6.5",
+    "currency.js": "^2.0.4",
     "v-mask": "^2.3.0",
     "vue": "^2.6.11",
     "vuetify": "^2.6.15",
