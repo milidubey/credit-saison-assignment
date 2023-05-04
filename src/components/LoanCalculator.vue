@@ -5,7 +5,7 @@
         <v-row>
           <v-col cols="12" md="12" lg="8" offset-lg="2">
             <v-card outlined class="pa-5">
-              <v-card-title>Loan Calculator </v-card-title>
+              <v-card-title>Loan Calculator by Mili Dubey</v-card-title>
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="4" lg="4">
@@ -311,7 +311,6 @@ export default {
       let n = this.tenureInMonths;
       let emi =
         (this.loanAmount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-      console.log("this.emi: ", emi);
       return emi;
     },
     totalAmountPayable() {
@@ -346,6 +345,7 @@ export default {
 
       //Calculate Data
       for (let i = 0; i < this.tenureInMonths; i++) {
+        //Years for repayment schedule grouping
         let year =
           i == 0
             ? this.months[this.now.getMonth()]
@@ -359,6 +359,7 @@ export default {
 
         let totalEmiPaid = this.emi * (i + 1);
 
+        //Calculate principal component of EMI
         let previousPrincipalAmount = 0;
         data.forEach((item) => {
           previousPrincipalAmount += item.principalAmount;
@@ -371,7 +372,11 @@ export default {
               (this.interestRate / 1200);
 
         let principalAmount = this.emi - interestAmount;
+
+        //Calculate (principal) balance for each month
         let principalBalance = 0;
+
+        //Principal balance is sum of previous principal amount paid deducted from total loan amount
         if (i == 0) {
           principalBalance = Math.round(this.loanAmount - principalAmount);
         } else {
@@ -384,6 +389,7 @@ export default {
           );
         }
 
+        //Create row data for repayment schedule
         let rowObj = {
           groupBy: groupBy,
           year: year,
@@ -396,7 +402,6 @@ export default {
           principalBalance: principalBalance,
         };
 
-        console.log("principalBalance ", rowObj.principalBalance);
         data.push(rowObj);
       }
       return data;
@@ -434,24 +439,21 @@ export default {
       }).format();
     },
     calculateTotalAnnualBalance(groupBy) {
-      // let totalAnnualPrincipalBalance = 0;
       let totalPrincipal = 0;
       this.repaymentScheduleData.forEach((item) => {
-        // console.log("item: ", item);
         if (item.groupBy <= groupBy) {
-          // console.log("item.totalPrincipal: ", item.principalAmount);
           totalPrincipal += item.principalAmount;
-          // console.log("totalPrincipal for " + groupBy + " : ", totalPrincipal);
         }
       });
       return Math.round(this.loanAmount - totalPrincipal);
     },
     calculateAnnualPrincipal(groupBy) {
-      let totalAnnualPayment = 0;
+      let totalAnnualPrincipal = 0;
       this.repaymentScheduleData.forEach((item) => {
-        if (item.groupBy == groupBy) totalAnnualPayment += item.principalAmount;
+        if (item.groupBy == groupBy)
+          totalAnnualPrincipal += item.principalAmount;
       });
-      return currency(totalAnnualPayment, {
+      return currency(totalAnnualPrincipal, {
         symbol: "₹",
         precision: 2,
       }).format();
@@ -462,7 +464,6 @@ export default {
       return ((balancePrincipal * 100) / this.loanAmount).toFixed(2);
     },
     formatCurrency(amount) {
-      console.log("amount: ", amount);
       return currency(amount, {
         symbol: "₹",
       }).format();
