@@ -58,6 +58,7 @@
                       v-model="interestRate"
                       :max="20"
                       :min="0"
+                      step="0.5"
                       track-color="grey"
                       track-fill-color="orange"
                       thumb-color="orange"
