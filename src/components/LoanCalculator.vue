@@ -3,202 +3,200 @@
     <v-main>
       <v-container fluid>
         <v-row>
-          <v-col cols="12" md="12" lg="9" offset="2">
-            <v-card>
+          <v-col cols="12" md="12" lg="8" offset="2">
+            <v-card outlined class="pa-5">
+              <v-card-title>Loan Calculator </v-card-title>
               <v-card-text>
                 <v-row>
-                  <v-col cols="12" md="12" lg="12">
+                  <v-col cols="12" md="4" lg="4">
                     <v-text-field
                       label="Loan Amount"
+                      hide-details
                       v-model.number="loanAmount"
                       type="number"
                       outlined
                       dense
-                      append-icon="mdi-currency-inr"
+                      prepend-icon="mdi-currency-inr"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" md="8" lg="12">
-                    <v-slider v-model="loanAmount" :max="20000000" :min="0">
+                  <v-col cols="12" md="8" lg="8">
+                    <v-slider
+                      v-model="loanAmount"
+                      :max="20000000"
+                      :min="0"
+                      track-color="grey"
+                      track-fill-color="orange"
+                      thumb-color="orange"
+                    >
                     </v-slider>
-
-                    <div class="steps" id="loanamountsteps">
-                      <span class="tick" style="left: 0%"
-                        >|<br /><span class="marker">0</span></span
-                      ><span class="tick hidden-xs" style="left: 12.5%"
-                        >|<br /><span class="marker">25L</span></span
-                      ><span class="tick" style="left: 25%"
-                        >|<br /><span class="marker">50L</span></span
-                      ><span class="tick hidden-xs" style="left: 37.5%"
-                        >|<br /><span class="marker">75L</span></span
-                      ><span class="tick" style="left: 50%"
-                        >|<br /><span class="marker">100L</span></span
-                      ><span class="tick hidden-xs" style="left: 62.5%"
-                        >|<br /><span class="marker">125L</span></span
-                      ><span class="tick" style="left: 75%"
-                        >|<br /><span class="marker">150L</span></span
-                      ><span class="tick hidden-xs" style="left: 87.5%"
-                        >|<br /><span class="marker">175L</span></span
-                      ><span class="tick" style="left: 100%"
-                        >|<br /><span class="marker">200L</span></span
+                    <div class="steps ml-5">
+                      <span
+                        v-for="(step, index) in loanAmountSteps"
+                        class="tick"
+                        :key="`loanAmountTick${index}`"
+                        :style="step.style"
+                        >|<br /><span class="marker">{{
+                          step.text
+                        }}</span></span
                       >
                     </div>
                   </v-col>
-                  <v-col cols="12" md="12" lg="12">
+
+                  <v-col cols="12" md="4" lg="4">
                     <v-text-field
+                      hide-details
                       label="Interest Rate"
                       v-model.number="interestRate"
                       type="number"
                       outlined
                       dense
-                      append-icon="mdi-currency-inr"
+                      prepend-icon="mdi-percent-outline"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" md="8" lg="12">
-                    <v-slider v-model="interestRate" :max="20" :min="0">
+                  <v-col cols="12" md="8" lg="8">
+                    <v-slider
+                      v-model="interestRate"
+                      :max="20"
+                      :min="0"
+                      track-color="grey"
+                      track-fill-color="orange"
+                      thumb-color="orange"
+                    >
                     </v-slider>
 
-                    <div class="steps" id="loanintereststeps">
-                      <span class="tick" style="left: 0%"
-                        >|<br /><span class="marker">0</span></span
-                      ><span class="tick" style="left: 25%"
-                        >|<br /><span class="marker">5</span></span
-                      ><span class="tick" style="left: 50%"
-                        >|<br /><span class="marker">10</span></span
-                      ><span class="tick" style="left: 75%"
-                        >|<br /><span class="marker">15</span></span
-                      ><span class="tick" style="left: 100%"
-                        >|<br /><span class="marker">20</span></span
+                    <div class="steps ml-5">
+                      <span
+                        class="tick"
+                        v-for="(step, index) in loanInterestSteps"
+                        :style="step.style"
+                        :key="`loanInterestStep${index}`"
+                        >|<br /><span class="marker">{{
+                          step.text
+                        }}</span></span
                       >
                     </div>
                   </v-col>
-                  <v-col cols="12" md="12" lg="12">
+                  <v-col cols="12" md="4" lg="4" class="d-flex justify-start">
                     <v-text-field
+                      class="mr-1"
                       label="Loan Tenure"
                       v-model.number="tenure"
                       type="number"
                       outlined
                       dense
-                      append-icon="mdi-currency-inr"
+                      prepend-icon="mdi-timer-sand"
                     ></v-text-field>
-                    <v-btn-toggle v-model="tenureType">
+                    <v-btn-toggle dense v-model="tenureType">
                       <v-btn> Yr </v-btn>
                       <v-btn> Mo </v-btn>
                     </v-btn-toggle>
                   </v-col>
-                  <v-col cols="12" md="8" lg="12">
+
+                  <v-col cols="12" md="8" lg="8">
                     <v-slider
                       v-model="tenure"
                       step="0.5"
                       :max="tenureType == 0 ? 30 : 360"
                       :min="0"
-                      hide-details
+                      track-color="grey"
+                      track-fill-color="orange"
+                      thumb-color="orange"
                     >
                     </v-slider>
-                    <div
-                      class="steps"
-                      id="loantermsteps"
-                      v-if="tenureType == 0"
+                    <div class="steps ml-5">
+                      <span
+                        class="tick"
+                        v-for="(step, index) in loanTermSteps"
+                        :style="step.style"
+                        :key="`loanTermStep${index}`"
+                        >|<br /><span class="marker">{{
+                          step.text
+                        }}</span></span
+                      >
+                    </div>
+                  </v-col>
+                  <template v-if="show">
+                    <v-col cols="12" lg="12">
+                      <v-divider></v-divider>
+                    </v-col>
+                    <v-col cols="12" md="12" lg="4">
+                      <div class="mb-5">
+                        <DoughnutChart
+                          id="amountPayableChart"
+                          ref="amountPayableChart"
+                          :chart-data="doughnutData"
+                          :chart-options="doughtnutOptions"
+                          chart-type="doughnut"
+                        />
+                      </div>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="12"
+                      lg="8"
+                      class="d-flex flex-column text-left align-start justify-center"
                     >
-                      <span class="tick" style="left: 0%"
-                        >|<br /><span class="marker">0</span></span
-                      ><span class="tick" style="left: 16.67%"
-                        >|<br /><span class="marker">5</span></span
-                      ><span class="tick" style="left: 33.33%"
-                        >|<br /><span class="marker">10</span></span
-                      ><span class="tick" style="left: 50%"
-                        >|<br /><span class="marker">15</span></span
-                      ><span class="tick" style="left: 66.67%"
-                        >|<br /><span class="marker">20</span></span
-                      ><span class="tick" style="left: 83.33%"
-                        >|<br /><span class="marker">25</span></span
-                      ><span class="tick" style="left: 100%"
-                        >|<br /><span class="marker">30</span></span
+                      <h1 class="my-2">
+                        Monthly EMI {{ formatCurrency(Math.round(emi)) }}
+                      </h1>
+                      <h3 class="my-2">
+                        Total Amount Payable
+                        {{ formatCurrency(totalAmountPayable) }}
+                      </h3>
+                      <h3 class="my-2">
+                        Total Interest Payable
+                        {{ formatCurrency(totalInterestPayable) }}
+                      </h3>
+                    </v-col>
+                    <v-col cols="12" md="12" lg="12">
+                      <v-data-table
+                        group-by="groupBy"
+                        :headers="headers"
+                        :items="repaymentScheduleData"
                       >
-                    </div>
-                    <div class="steps" id="loantermsteps" v-else>
-                      <span class="tick" style="left: 0%"
-                        >|<br /><span class="marker">0</span></span
-                      ><span class="tick" style="left: 16.67%"
-                        >|<br /><span class="marker">60</span></span
-                      ><span class="tick" style="left: 33.33%"
-                        >|<br /><span class="marker">120</span></span
-                      ><span class="tick" style="left: 50%"
-                        >|<br /><span class="marker">180</span></span
-                      ><span class="tick" style="left: 66.67%"
-                        >|<br /><span class="marker">240</span></span
-                      ><span class="tick" style="left: 83.33%"
-                        >|<br /><span class="marker">300</span></span
-                      ><span class="tick" style="left: 100%"
-                        >|<br /><span class="marker">360</span></span
-                      >
-                    </div>
-                  </v-col>
-                  <v-col cols="12" md="12" lg="12" v-if="show">
-                    <h2>Emi: {{ formatCurrency(Math.round(emi)) }}</h2>
-                    <h2>
-                      Total amount payable:
-                      {{ formatCurrency(totalAmountPayable) }}
-                    </h2>
-                    <h2>
-                      Total interest payable:
-                      {{ formatCurrency(totalInterestPayable) }}
-                    </h2>
-                  </v-col>
-                  <v-col cols="12" md="12" lg="12" v-if="show">
-                    <div class="mb-5">
-                      <DoughnutChart
-                        id="amountPayableChart"
-                        ref="amountPayableChart"
-                        :chart-data="doughnutData"
-                        :chart-options="doughtnutOptions"
-                        chart-type="doughnut"
-                      />
-                    </div>
-                  </v-col>
-                  <v-col cols="12" md="12" lg="12" v-if="show">
-                    <v-data-table
-                      group-by="groupBy"
-                      :headers="headers"
-                      :items="repaymentScheduleData"
-                    >
-                      <template
-                        v-slot:group.header="{ group, items, isOpen, toggle }"
-                      >
-                        <template v-if="group != ''">
-                          <td class="d-flex justify-start align-center">
-                            <v-icon small class="mr-2" @click="toggle"
-                              >{{ isOpen ? "mdi-minus" : "mdi-plus" }} </v-icon
-                            ><span class="ml-2">{{ group }}</span>
-                          </td>
-                          <!-- <td>{{ calculateAnnualPrincipal(group) }}</td> -->
-                          <td class="text-left">
-                            {{ calculateAnnualPayment(group) }}
-                          </td>
-                          <td class="text-left">
-                            {{
-                              formatCurrency(calculateTotalAnnualBalance(group))
-                            }}
-                          </td>
-                          <td class="text-left">
-                            {{ calculateTotalAnnualPercentage(group) }}%
-                          </td>
+                        <template
+                          v-slot:group.header="{ group, items, isOpen, toggle }"
+                        >
+                          <template v-if="group != ''">
+                            <td class="d-flex justify-start align-center">
+                              <v-icon small class="mr-2" @click="toggle"
+                                >{{
+                                  isOpen ? "mdi-minus" : "mdi-plus"
+                                }} </v-icon
+                              ><span class="ml-2">{{ group }}</span>
+                            </td>
+                            <!-- <td>{{ calculateAnnualPrincipal(group) }}</td> -->
+                            <td class="text-left">
+                              {{ calculateAnnualPayment(group) }}
+                            </td>
+                            <td class="text-left">
+                              {{
+                                formatCurrency(
+                                  calculateTotalAnnualBalance(group)
+                                )
+                              }}
+                            </td>
+                            <td class="text-left">
+                              {{ calculateTotalAnnualPercentage(group) }}%
+                            </td>
+                          </template>
+                          <th v-else class="d-none"></th>
                         </template>
-                        <th v-else class="d-none"></th>
-                      </template>
-                      <!-- <template v-slot:[`item.principalAmount`]="{ item }">
+                        <!-- <template v-slot:[`item.principalAmount`]="{ item }">
                         {{ Math.round(item.principalAmount) }}
                       </template> -->
-                      <template v-slot:[`item.loanPaidToDate`]="{ item }"
-                        >{{ item.loanPaidToDate.toFixed(2) }}%</template
-                      >
-                      <template v-slot:[`item.principalBalance`]="{ item }">{{
-                        formatCurrency(item.principalBalance.toFixed(2))
-                      }}</template>
-                      <template v-slot:[`item.totalPayment`]="{ item }">{{
-                        formatCurrency(item.totalPayment.toFixed(2))
-                      }}</template>
-                    </v-data-table>
-                  </v-col>
+                        <template v-slot:[`item.loanPaidToDate`]="{ item }"
+                          >{{ item.loanPaidToDate.toFixed(2) }}%</template
+                        >
+                        <template v-slot:[`item.principalBalance`]="{ item }">{{
+                          formatCurrency(item.principalBalance.toFixed(2))
+                        }}</template>
+                        <template v-slot:[`item.totalPayment`]="{ item }">{{
+                          formatCurrency(item.totalPayment.toFixed(2))
+                        }}</template>
+                      </v-data-table>
+                    </v-col>
+                  </template>
                 </v-row>
               </v-card-text>
             </v-card>
@@ -274,6 +272,24 @@ export default {
         },
       ],
       tenureType: 0,
+      loanAmountSteps: [
+        { text: "0", style: "left:0%;" },
+        { text: "25L", style: "left:12.5%;" },
+        { text: "50L", style: "left:25%;" },
+        { text: "75L", style: "left:37.5%;" },
+        { text: "100L", style: "left:50%;" },
+        { text: "125L", style: "left:62.5%;" },
+        { text: "150L", style: "left:75%;" },
+        { text: "175L", style: "left:87.5%;" },
+        { text: "200L", style: "left:100%;" },
+      ],
+      loanInterestSteps: [
+        { text: "0", style: "left:0%;" },
+        { text: "5", style: "left:25%;" },
+        { text: "10", style: "left:50%;" },
+        { text: "15", style: "left:75%;" },
+        { text: "20", style: "left:100%;" },
+      ],
     };
   },
   components: {
@@ -300,7 +316,7 @@ export default {
         datasets: [
           {
             data: [this.loanAmount, this.totalInterestPayable],
-            backgroundColor: ["#EE8D2B", "#88A726"],
+            backgroundColor: ["#88A726", "#EE8D2B"],
             borderJoinStyle: "bevel",
           },
         ],
@@ -376,6 +392,28 @@ export default {
       }
       return data;
     },
+    loanTermSteps() {
+      if (this.tenureType == 0)
+        return [
+          { text: "0", style: "left:0%;" },
+          { text: "5", style: "left:16.67%;" },
+          { text: "10", style: "left:33.33%;" },
+          { text: "15", style: "left:50%;" },
+          { text: "20", style: "left:66.66%;" },
+          { text: "25", style: "left:83.33%;" },
+          { text: "30", style: "left:100%;" },
+        ];
+      else
+        return [
+          { text: "0", style: "left:0%;" },
+          { text: "60", style: "left:16.67%;" },
+          { text: "120", style: "left:33.33%;" },
+          { text: "180", style: "left:50%;" },
+          { text: "240", style: "left:66.66%;" },
+          { text: "300", style: "left:83.33%;" },
+          { text: "360", style: "left:100%;" },
+        ];
+    },
   },
   methods: {
     calculateAnnualPayment(groupBy) {
@@ -430,11 +468,11 @@ export default {
   font-size: 11px;
   height: 11px;
   left: 0;
-  line-height: 11px;
+  line-height: 0px;
   margin-left: -24px;
   position: absolute;
   text-align: center;
-  width: 30px;
+  width: 28px;
 }
 
 .marker {
@@ -444,5 +482,10 @@ export default {
   height: 18px;
   line-height: 18px;
   text-align: center;
+}
+
+.steps {
+  position: relative;
+  margin-top: -0.75rem;
 }
 </style>
