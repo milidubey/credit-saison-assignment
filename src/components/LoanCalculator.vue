@@ -1,9 +1,9 @@
 <template>
   <v-app>
     <v-main>
-      <v-container fluid>
+      <v-container fluid class="mt-15">
         <v-row>
-          <v-col cols="12" md="12" lg="8" offset="2">
+          <v-col cols="12" md="12" lg="8" offset-lg="2">
             <v-card outlined class="pa-5">
               <v-card-title>Loan Calculator </v-card-title>
               <v-card-text>
@@ -11,15 +11,15 @@
                   <v-col cols="12" md="4" lg="4">
                     <v-text-field
                       label="Loan Amount"
-                      hide-details
                       v-model.number="loanAmount"
                       type="number"
                       outlined
                       dense
+                      hide-details
                       prepend-icon="mdi-currency-inr"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" md="8" lg="8">
+                  <v-col cols="12" md="8" lg="8" class="mb-3 mb-lg-0">
                     <v-slider
                       v-model="loanAmount"
                       :max="20000000"
@@ -44,16 +44,16 @@
 
                   <v-col cols="12" md="4" lg="4">
                     <v-text-field
-                      hide-details
                       label="Interest Rate"
                       v-model.number="interestRate"
                       type="number"
                       outlined
                       dense
+                      hide-details
                       prepend-icon="mdi-percent-outline"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" md="8" lg="8">
+                  <v-col cols="12" md="8" lg="8" class="mb-3 mb-lg-0">
                     <v-slider
                       v-model="interestRate"
                       :max="20"
@@ -76,6 +76,7 @@
                       >
                     </div>
                   </v-col>
+
                   <v-col cols="12" md="4" lg="4" class="d-flex justify-start">
                     <v-text-field
                       class="mr-1"
@@ -84,6 +85,7 @@
                       type="number"
                       outlined
                       dense
+                      hide-details=""
                       prepend-icon="mdi-timer-sand"
                     ></v-text-field>
                     <v-btn-toggle dense v-model="tenureType">
@@ -92,7 +94,7 @@
                     </v-btn-toggle>
                   </v-col>
 
-                  <v-col cols="12" md="8" lg="8">
+                  <v-col cols="12" md="8" lg="8" class="mb-3 mb-lg-0">
                     <v-slider
                       v-model="tenure"
                       step="0.5"
@@ -136,16 +138,23 @@
                       lg="8"
                       class="d-flex flex-column text-left align-start justify-center"
                     >
-                      <h1 class="my-2">
-                        Monthly EMI {{ formatCurrency(Math.round(emi)) }}
+                      <h1
+                        class="my-2 d-flex flex-sm-column justify-space-between flex-lg-row"
+                      >
+                        <div class="mr-2">EMI</div>
+                        <div>{{ formatCurrency(Math.round(emi)) }}</div>
                       </h1>
-                      <h3 class="my-2">
-                        Total Amount Payable
-                        {{ formatCurrency(totalAmountPayable) }}
+                      <h3
+                        class="my-2 d-flex flex-sm-column justify-space-between flex-lg-row"
+                      >
+                        <div class="mr-2">Total Amount Payable</div>
+                        <div>{{ formatCurrency(totalAmountPayable) }}</div>
                       </h3>
-                      <h3 class="my-2">
-                        Total Interest Payable
-                        {{ formatCurrency(totalInterestPayable) }}
+                      <h3
+                        class="my-2 d-flex flex-sm-column justify-space-between flex-lg-row"
+                      >
+                        <div class="mr-2">Total Interest Payable</div>
+                        <div>{{ formatCurrency(totalInterestPayable) }}</div>
                       </h3>
                     </v-col>
                     <v-col cols="12" md="12" lg="12">
@@ -463,6 +472,11 @@ export default {
 </script>
 
 <style>
+#app {
+  background-color: #eee !important;
+  margin-top: 0px !important;
+}
+
 .tick {
   color: #ccc;
   font-size: 11px;
